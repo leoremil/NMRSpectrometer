@@ -7,26 +7,34 @@ import os
 
 path = os.path.dirname(os.path.abspath(__file__))
 
-CAPTURE_DURATION = 0.1
-START_TIME = 0
-REFERENCE_START_TIME = 0.1
+CAPTURE_DURATION = 0.1 #total sampling time
+START_TIME = 0 #Rough start of FID signal
+REFERENCE_START_TIME = 0.1 #Time where FID is gone to use as a comparison signal
 
 NUM_FREQ_ARRAY_ELEMENTS = 2 #number of frequencies tested
-NUM_DURATION_ARRAY_ELEMENTS = 2 #Number of different pulse widths?
+NUM_DURATION_ARRAY_ELEMENTS = 2 #Number of different pulse widths tried
 # Note that setting the averages to greater than 1 removes the peaks from the
 # first trial (and only the first trial). Not sure why.
-NUM_AVERAGES = 2 #number of scans per frequency?
-NUM_ECHOS = 10 #number of echo signals per file
+NUM_AVERAGES = 2 #number scans (or files) done for each frequency and pulse width combination
+NUM_ECHOS = 10 #number of echo signals per scan
 
 sample_time = 500e-3;
 
+#Go through each frequency, each pulse width file and process the signals.
+#First, all the scans (files) for a given freq and pusle width are averaged.
+#Spikes in the averaged signal from relay switching are replaced with the average
+#signal value. The location of the spikes are determined empirically. The NMR
+#and reference signals are isolated. Then, the FFT is taken for each and magnitude
+#calculated. A time domain and frequency domain plot is generated for each freq/
+#pulse width combination.
 for i in list(range(NUM_FREQ_ARRAY_ELEMENTS)):
 
 	for j in list(range(NUM_DURATION_ARRAY_ELEMENTS)):
 
 		signal_ave = 0
 		reference_ave = 0
-
+        
+        #Averaging
 		for k in list(range(NUM_AVERAGES)):
 
 			data = np.loadtxt(path + '/test_data_' + str(i) + '_' + str(j) + '_' + str(k) + '.csv', delimiter=',', unpack=True, skiprows=1)[0:2]
@@ -38,7 +46,8 @@ for i in list(range(NUM_FREQ_ARRAY_ELEMENTS)):
 			signal_ave += signal
 
 		signal_ave = signal_ave/(NUM_AVERAGES)
-
+        
+        # Remove Spikes due to relay switcgin, replace with average singal value.
 		# Empirical fit to see what range to remove. (Note can set replacement
 		# value as non zero (~0.3) to help align portion being removed with
 		# spikes. Ideally this could be based on the relay delay time, the pulse
@@ -49,7 +58,9 @@ for i in list(range(NUM_FREQ_ARRAY_ELEMENTS)):
 		# alternative method to remove noise by removing large value
 		# signal_ave[np.abs(signal_ave - np.average(signal_ave)) > 0.7*np.average(np.abs(signal_ave))] = np.average(signal_ave)
 
+        #Isolate the NMR signal
 		signal_trimmed = (signal_ave)[(t <= START_TIME + CAPTURE_DURATION) & (t > START_TIME)]
+        #Isolate the reference signal
 		reference_trimmed = (signal_ave)[(t <= REFERENCE_START_TIME + CAPTURE_DURATION) & (t > REFERENCE_START_TIME)]
 
 		f = np.fft.fftfreq(int(sample_rate*CAPTURE_DURATION),1/sample_rate) 
@@ -62,11 +73,13 @@ for i in list(range(NUM_FREQ_ARRAY_ELEMENTS)):
 
 		min_f = 50e3
 		max_f = 60e3
-
+        
+        #Take only values within the specified freq. range
 		f_trimmed = f[(f > min_f) & (f < max_f)]
 		signal_dBV = signal_dBV[(f > min_f) & (f < max_f)]
 		reference_dBV = reference_dBV[(f > min_f) & (f < max_f)]
 
+        #Find and display peak value, average noise, peak frequency
 		signal_peak = np.max(signal_dBV)
 		noise_ave = np.sum(signal_dBV)/np.size(f_trimmed)
 		print(noise_ave)
@@ -74,7 +87,8 @@ for i in list(range(NUM_FREQ_ARRAY_ELEMENTS)):
 		print((f_trimmed[signal_dBV >= signal_peak])/1e3)
 		# print(signal_peak-noise_ave)
 		print("\n")
-
+        
+        #Plotting for FFT of a frequency/pulsewidth combo
 		plt.close('all')
 
 		rc = {"font.family" : "serif", "mathtext.fontset" : "stix"}
@@ -125,7 +139,7 @@ for i in list(range(NUM_FREQ_ARRAY_ELEMENTS)):
 		plt.savefig(path + '/FFT_' + str(i) + '_' + str(j)  + '.pdf')
 
 
-
+        #Plot time domain of frequency/pulsewidth combo
 		plt.close('all')
 
 		rc = {"font.family" : "serif", "mathtext.fontset" : "stix"}
