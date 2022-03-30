@@ -11,12 +11,12 @@ CAPTURE_DURATION = 0.1
 START_TIME = 0
 REFERENCE_START_TIME = 0.1
 
-NUM_FREQ_ARRAY_ELEMENTS = 2
-NUM_DURATION_ARRAY_ELEMENTS = 2
+NUM_FREQ_ARRAY_ELEMENTS = 2 #number of frequencies tested
+NUM_DURATION_ARRAY_ELEMENTS = 2 #Number of different pulse widths?
 # Note that setting the averages to greater than 1 removes the peaks from the
 # first trial (and only the first trial). Not sure why.
-NUM_AVERAGES = 2
-NUM_ECHOS = 10
+NUM_AVERAGES = 2 #number of scans per frequency?
+NUM_ECHOS = 10 #number of echo signals per file
 
 sample_time = 500e-3;
 
