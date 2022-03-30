@@ -12,11 +12,19 @@ START_TIME = 0 #Rough start of FID signal
 REFERENCE_START_TIME = 0.1 #Time where FID is gone to use as a comparison signal
 
 NUM_FREQ_ARRAY_ELEMENTS = 2 #number of frequencies tested
+
 NUM_DURATION_ARRAY_ELEMENTS = 2 #Number of different pulse widths tried
 # Note that setting the averages to greater than 1 removes the peaks from the
 # first trial (and only the first trial). Not sure why.
 NUM_AVERAGES = 2 #number scans (or files) done for each frequency and pulse width combination
 NUM_ECHOS = 10 #number of echo signals per scan
+
+NUM_DURATION_ARRAY_ELEMENTS = 2 #Number of different pulse widths?
+# Note that setting the averages to greater than 1 removes the peaks from the
+# first trial (and only the first trial). Not sure why.
+NUM_AVERAGES = 2 #number of scans per frequency?
+NUM_ECHOS = 10 #number of echo signals per file
+
 
 sample_time = 500e-3;
 
